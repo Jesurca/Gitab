@@ -1,0 +1,4 @@
+data/
+gitea.exe
+*.log
+*.db
