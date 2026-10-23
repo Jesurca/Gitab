@@ -1,0 +1,52 @@
+services:
+  # 1. SERVICIO PRIVADO PARA MYSQL
+  - type: pserv
+    name: gitea-mysql
+    env: docker
+    plan: starter
+    # Usamos la imagen oficial de MySQL directamente
+    image: mysql:8.0
+    disk:
+      name: mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 10
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        generateValue: true
+      - key: MYSQL_DATABASE
+        value: gitea_db
+      - key: MYSQL_USER
+        value: gitea_user
+      - key: MYSQL_PASSWORD
+        generateValue: true
+
+  # 2. SERVICIO WEB PARA GITEA
+  - type: web
+    name: mi-gitea
+    env: docker
+    plan: starter
+    disk:
+      name: gitea-data
+      mountPath: /data
+      sizeGB: 10
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: GITEA__database__DB_TYPE
+        value: mysql
+      # Render usa el "name" del servicio privado y el puerto 3306 para conectarlos internamente
+      - key: GITEA__database__HOST
+        value: gitea-mysql:3306
+      - key: GITEA__database__NAME
+        value: gitea_db
+      - key: GITEA__database__USER
+        value: gitea_user
+      # Importamos la contraseña generada automáticamente en el servicio MySQL
+      - key: GITEA__database__PASSWD
+        fromService:
+          type: pserv
+          name: gitea-mysql
+          envVarKey: MYSQL_PASSWORD
+      - key: GITEA__server__ROOT_URL
+        sync: false
+        value: https://mi-gitea.onrender.com/
