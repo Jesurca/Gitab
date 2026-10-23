@@ -50,3 +50,5 @@ services:
       - key: GITEA__server__ROOT_URL
         sync: false
         value: https://mi-gitea.onrender.com/
+      - key: GITEA__DEFAULT__APP_NAME
+        value: Gitab
